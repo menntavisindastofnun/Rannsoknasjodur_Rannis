@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fjárhagsáætlun — Rannís verkefnastyrkur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2DD2C0;          /* turquoise — main accent */
+    --primary-dark: #1FA89A;     /* darker turquoise for hover/contrast */
+    --primary-light: #E0F7F4;    /* very light turquoise for tints */
+    --primary-glow: #00FFBA;     /* neon green — used very sparingly */
+    --hi-blue: #10099F;          /* HÍ deep blue */
+    --warm: #FAC55B;             /* yellow */
+    --warm-deep: #FFA05F;        /* orange */
+    --ink: #262626;              /* near-black, soft */
+    --ink-soft: #5A5A5A;
+    --ink-faint: #9A9A9A;
+    --paper: #F5F5F5;            /* HÍ light gray background */
+    --paper-warm: #EEEEEE;       /* HÍ darker gray for emphasized boxes */
+    --rule: #D9D6CB;
+    --rule-soft: #EAE7DD;
+    --negative: #8B2635;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .serif { font-family: 'Open Sans', -apple-system, sans-serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 48px 80px;
+  }
+
+  /* GRANT VARIANT SELECTOR */
+  .variant-selector {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .variant-selector-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+
+  .variant-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .variant-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .variant-option:hover {
+    border-color: var(--primary);
+  }
+
+  .variant-option.selected {
+    border-color: var(--primary-dark);
+    background: var(--primary-light);
+  }
+
+  .variant-option input[type="radio"] {
+    cursor: pointer;
+  }
+
+  .variant-option-label {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  .variant-option.selected .variant-option-label {
+    font-weight: 500;
+  }
+
+  .variant-note {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* LOCKED ROLE DISPLAY */
+  .locked-role {
+    padding: 6px 0;
+    font-size: 0.95rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .locked-role-hint {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    font-style: italic;
+    margin-left: 8px;
+  }
+
+  /* BUDGET TRACKER (sticky sidebar) */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .main-col {
+    min-width: 0; /* prevents grid blowout */
+  }
+
+  .tracker-col {
+    position: sticky;
+    top: 32px;
+  }
+
+  .tracker {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 24px 22px;
+  }
+
+  .tracker-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .tracker-grant-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 18px;
+    line-height: 1.2;
+  }
+
+  .tracker-progress {
+    height: 8px;
+    background: var(--paper-warm);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .tracker-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.3s ease, background 0.2s ease;
+    border-radius: 4px;
+  }
+
+  .tracker.over .tracker-progress-fill {
+    background: var(--warm-deep);
+  }
+
+  .tracker-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-align: right;
+    margin-bottom: 18px;
+  }
+
+  .tracker.over .tracker-pct {
+    color: var(--warm-deep);
+    font-weight: 500;
+  }
+
+  .tracker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .tracker-row:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+  }
+
+  .tracker-row-label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .tracker-row-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .tracker-row.remaining .tracker-row-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .tracker.over .tracker-row.remaining .tracker-row-label {
+    color: var(--warm-deep);
+  }
+
+  .tracker.over .tracker-row.remaining .tracker-row-value {
+    color: var(--warm-deep);
+  }
+
+  /* On smaller screens: collapse to bottom bar */
+  @media (max-width: 1100px) {
+    .layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .tracker-col {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      z-index: 50;
+      background: white;
+      border-top: 1px solid var(--ink);
+      padding: 0;
+    }
+    .tracker {
+      border: none;
+      padding: 14px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .tracker-eyebrow,
+    .tracker-grant-name {
+      display: none;
+    }
+    .tracker-progress {
+      margin-bottom: 8px;
+    }
+    .tracker-pct {
+      display: none;
+    }
+    .tracker-rows-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .tracker-row {
+      padding: 0;
+      border: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    .tracker-row-label {
+      font-size: 0.65rem;
+    }
+    .tracker-row-value {
+      font-size: 0.9rem;
+    }
+    .tracker-row.remaining .tracker-row-value {
+      font-size: 1rem;
+    }
+    /* add bottom padding to body so footer not hidden behind tracker */
+    body {
+      padding-bottom: 110px;
+    }
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .logos {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    height: 44px;
+  }
+
+  .logo-slot {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .logo-slot img {
+    max-height: 44px;
+    max-width: 180px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .logo-fallback {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+
+  .logo-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--rule);
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--hi-blue);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--hi-blue);
+  }
+
+  .subtitle {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    max-width: 600px;
+  }
+
+  .header-meta {
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  /* SETTINGS BAR */
+  .settings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    margin-bottom: 56px;
+  }
+
+  .setting {
+    padding: 20px 24px;
+    border-right: 1px solid var(--rule);
+  }
+
+  .setting:last-child { border-right: none; }
+
+  .setting label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+
+  .setting select, .setting input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+    font-weight: 600;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .setting input:focus, .setting select:focus { outline: none; color: var(--primary); }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 64px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 12px;
+  }
+
+  .section-num {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--primary);
+    font-weight: 400;
+  }
+
+  h2 {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .section-desc {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+    max-width: 700px;
+  }
+
+  /* PERSON ROWS */
+  .person-row, .expense-row, .travel-row {
+    background: white;
+    border: 1px solid var(--rule);
+    margin-bottom: 12px;
+    padding: 20px 24px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  /* Right-align all fields inside person-row except the role dropdown
+     (role is text-heavy and reads better left-aligned) */
+  .person-row .field label {
+    text-align: right;
+  }
+  .person-row .field input {
+    text-align: right;
+  }
+  .person-row .field.role-field label {
+    text-align: left;
+  }
+  .person-row .field.role-field select,
+  .person-row .field.role-field .locked-role {
+    text-align: left;
+  }
+
+  .person-row:hover, .expense-row:hover, .travel-row:hover {
+    border-color: var(--primary);
+    box-shadow: 0 1px 0 rgba(16, 9, 159, 0.05);
+  }
+
+  .row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .row-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 8px;
+    transition: color 0.15s;
+  }
+  .delete-btn:hover { color: var(--negative); }
+
+  .person-grid {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    padding: 6px 0;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .field input.numeric {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .row-result {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  .row-result-label {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  .row-result-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* ADD BUTTON */
+  .add-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--ink-faint);
+    padding: 14px;
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .add-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    border-style: solid;
+  }
+
+  .add-btn::before {
+    content: "+ ";
+    font-style: normal;
+    margin-right: 4px;
+  }
+
+  /* CAP WARNING */
+  .cap-warning {
+    margin-top: 20px;
+    background: #FFF7E5;
+    border: 1px solid var(--warm-deep);
+    border-left: 4px solid var(--warm-deep);
+    padding: 18px 22px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .cap-warning-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--warm-deep);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .cap-warning-text {
+    flex: 1;
+  }
+
+  .cap-warning-title {
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+  }
+
+  .cap-warning-detail {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* INFO ICON & MODAL */
+  .field-info-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-size: 9px;
+    font-weight: 600;
+    border: 1px solid var(--rule);
+    text-decoration: none;
+    margin-left: 6px;
+    transition: all 0.15s;
+    vertical-align: 1px;
+    line-height: 1;
+  }
+  .field-info-link:hover {
+    background: var(--primary);
+    color: var(--ink);
+    border-color: var(--primary-dark);
+  }
+
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--rule);
+    transition: all 0.15s;
+    margin-left: 8px;
+    user-select: none;
+    vertical-align: middle;
+  }
+
+  .info-icon:hover {
+    background: var(--primary);
+    color: var(--ink);
+    border-color: var(--primary-dark);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(38, 38, 38, 0.5);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal {
+    background: var(--paper);
+    max-width: 580px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid var(--ink);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.25s ease;
+    position: relative;
+  }
+
+  .modal-head {
+    padding: 28px 32px 16px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .modal-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+  }
+
+  .modal-title {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--ink-faint);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--ink); }
+
+  .modal-body {
+    padding: 24px 32px 32px;
+  }
+
+  .modal-desc {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+
+  .modal-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+    margin-top: 4px;
+  }
+
+  .example-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .example-item {
+    padding: 12px 14px;
+    border: 1px solid var(--rule);
+    background: white;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.15s;
+  }
+
+  .example-item.clickable {
+    cursor: pointer;
+  }
+
+  .example-item.clickable:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  .example-text {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .example-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    color: var(--ink);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .example-amount-range {
+    color: var(--ink-soft);
+  }
+
+  .example-add-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--primary-dark);
+    opacity: 0;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+
+  .example-item.clickable:hover .example-add-hint {
+    opacity: 1;
+  }
+
+  .modal-note {
+    background: var(--paper-warm);
+    border-left: 3px solid var(--warm-deep);
+    padding: 12px 16px;
+    margin-top: 20px;
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .modal-note a { color: var(--primary-dark); }
+
+  /* EXPENSE PICKER */
+  .expense-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .expense-tag-group {
+    display: inline-flex;
+    align-items: stretch;
+    background: white;
+    border: 1px solid var(--rule);
+    transition: border-color 0.15s;
+  }
+
+  .expense-tag-group:hover {
+    border-color: var(--primary);
+  }
+
+  .expense-tag-group .expense-tag {
+    border: none;
+    background: transparent;
+  }
+
+  .expense-tag-group .info-icon {
+    margin-left: 0;
+    border-radius: 0;
+    border: none;
+    border-left: 1px solid var(--rule);
+    background: transparent;
+    width: 32px;
+    height: auto;
+    color: var(--ink-faint);
+  }
+
+  .expense-tag-group .info-icon:hover {
+    background: var(--primary);
+    color: var(--ink);
+  }
+
+  .expense-tag {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 8px 14px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .expense-tag:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .expense-tag::before {
+    content: "+ ";
+    color: var(--ink-faint);
+  }
+
+  /* EXPENSE ROWS */
+  .expense-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+
+  .expense-grid.with-financing {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .travel-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 14px;
+    align-items: end;
+  }
+
+  .travel-radio-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .travel-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  .travel-radio input { cursor: pointer; }
+  .travel-radio input:checked + span { color: var(--primary); font-weight: 500; }
+
+  /* OVERVIEW TABLE */
+  .overview-wrapper {
+    background: white;
+    border: 1px solid var(--ink);
+    overflow-x: auto;
+  }
+
+  table.overview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  table.overview th {
+    background: var(--paper-warm);
+    border-bottom: 2px solid var(--ink);
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  table.overview th:not(:first-child) { text-align: right; }
+
+  table.overview td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.overview td:first-child {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1rem;
+  }
+
+  table.overview td:not(:first-child) { text-align: right; }
+
+  table.overview tbody tr:hover { background: var(--paper-warm); }
+
+  table.overview tr.subtotal td {
+    border-top: 1px solid var(--ink);
+    background: var(--paper-warm);
+    font-weight: 600;
+  }
+
+  table.overview tr.grand-total td {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    background: var(--primary);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  table.overview tr.grand-total td:first-child {
+    font-style: italic;
+  }
+
+  /* YEAR BREAKDOWN */
+  .yearly-breakdown {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0;
+    border: 1px solid var(--rule);
+  }
+
+  .year-card {
+    padding: 20px 24px;
+    border-right: 1px solid var(--rule);
+    background: white;
+  }
+
+  .year-card:last-child { border-right: none; }
+
+  .year-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .year-amount {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .year-amount .currency {
+    font-size: 0.7em;
+    color: var(--ink-faint);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  /* SUMMARY CARD */
+  .grand-summary {
+    margin-top: 40px;
+    background: var(--hi-blue);
+    color: var(--paper);
+    padding: 40px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grand-summary::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(45, 210, 192, 0.45) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .grand-summary::after {
+    content: "";
+    position: absolute;
+    bottom: -60px;
+    left: -60px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(255, 160, 95, 0.22) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .summary-block {
+    position: relative;
+    z-index: 1;
+  }
+
+  .summary-block .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(251, 250, 247, 0.55);
+    margin-bottom: 12px;
+  }
+
+  .summary-block.highlight .label {
+    color: var(--warm);
+  }
+
+  .summary-block .amount {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-size: 2.4rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .summary-block.highlight .amount {
+    color: var(--warm);
+  }
+
+  .summary-block .amount .currency {
+    font-size: 0.5em;
+    opacity: 0.6;
+    font-weight: 400;
+    margin-left: 8px;
+  }
+
+  .summary-block .sub {
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: rgba(251, 250, 247, 0.7);
+    margin-top: 8px;
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  footer a { color: var(--primary); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px;
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    border: 1px dashed var(--rule);
+    margin-bottom: 12px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .container { padding: 32px 20px 60px; }
+    .settings { grid-template-columns: 1fr; }
+    .setting { border-right: none; border-bottom: 1px solid var(--rule); }
+    .setting:last-child { border-bottom: none; }
+    .person-grid, .expense-grid, .travel-grid { grid-template-columns: 1fr; }
+    .grand-summary { grid-template-columns: 1fr; padding: 28px; }
+    .header-meta { position: static; text-align: left; margin-top: 16px; }
+    h1 { font-size: 2rem; }
+    .yearly-breakdown { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: white; }
+    .add-btn, .delete-btn, .expense-picker { display: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logos">
+      <!--
+        LOGO INSTRUCTIONS:
+        1. Download HÍ logo from hi.is/haskolinn/honnunarstadall (SVG preferred)
+        2. Download Rannís logo from rannis.is
+        3. Place files in same folder as index.html, named:
+           - hi-logo.svg (or .png)
+           - rannis-logo.svg (or .png)
+        4. The img tags below will pick them up automatically.
+        5. If files are missing, the text fallback will show instead.
+      -->
+      <div class="logo-slot">
+        <img src="hi-logo.svg" alt="Háskóli Íslands" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <span class="logo-fallback" style="display:none;">HÁSKÓLI&nbsp;ÍSLANDS</span>
+      </div>
+      <div class="logo-divider"></div>
+      <div class="logo-slot">
+        <img src="rannis-logo.svg" alt="Rannís" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <span class="logo-fallback" style="display:none;">RANNÍS</span>
+      </div>
+    </div>
+    <div class="eyebrow">Verkefnastyrkur · Project grant</div>
+    <h1>Fjárhagsáætlun <em>—</em> reiknivél</h1>
+    <p class="subtitle">Áætlaðu launakostnað og útgjöld verkefnis. Tölur eru leiðbeinandi og taka ekki til launatengdra gjalda, sem leggjast ofan á við endanlega umsókn.</p>
+    <div class="header-meta">
+      Útg. 2.0<br>
+      <span id="today"></span>
+    </div>
+  </header>
+
+  <!-- GLOBAL SETTINGS -->
+  <div class="settings">
+    <div class="setting">
+      <label>Styrktegund</label>
+      <select id="grantType">
+        <option value="ondvegisstyrkur">Öndvegisstyrkur</option>
+        <option value="nyliðunarstyrkur">Nýliðunarstyrkur</option>
+        <option value="verkefnisstyrkur" selected>Verkefnisstyrkur</option>
+        <option value="nydoktorsstyrkur">Nýdoktorsstyrkur</option>
+        <option value="doktorsnemastyrkur">Doktorsnemastyrkur</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>Lengd verkefnis</label>
+      <select id="duration">
+        <option value="1">1 ár</option>
+        <option value="2">2 ár</option>
+        <option value="3" selected>3 ár</option>
+        <option value="4">4 ár</option>
+        <option value="5">5 ár</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label>Tungumál</label>
+      <select id="lang">
+        <option value="is" selected>Íslenska</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="layout">
+  <div class="main-col">
+
+  <!-- SECTION I: SALARIES -->
+  <section id="salaries-section">
+    <div class="section-head">
+      <span class="section-num">I.</span>
+      <h2 data-i18n="salaries">Laun</h2>
+    </div>
+    <p class="section-desc" data-i18n="salaries-desc">Bættu við starfsfólki sem fær laun greidd af verkefninu. Veldu starfshlutfall með því að stilla mánuði á ári.</p>
+
+    <div id="people-list"></div>
+    <button class="add-btn" id="addPersonBtn" onclick="addPerson()" data-i18n="add-person">Bæta við starfsmanni</button>
+  </section>
+
+  <!-- SECTION II: EXPENSES -->
+  <section id="expenses-section">
+    <div class="section-head">
+      <span class="section-num">II.</span>
+      <h2 data-i18n="expenses">Útgjöld og þjónusta</h2>
+    </div>
+    <p class="section-desc" data-i18n="expenses-desc">Veldu útgjaldaflokk til að bæta við. Hægt er að bæta við mörgum færslum í hverjum flokki — t.d. einni ferð per ári.</p>
+
+    <div class="expense-picker" id="expensePicker">
+      <div class="expense-tag-group" data-expense-type="operating">
+        <button class="expense-tag" onclick="addExpense('operating')" data-i18n="op-add">Rekstrarkostnaður</button>
+        <button class="info-icon" onclick="openInfo('operating')" title="Útskýringar og dæmi">i</button>
+      </div>
+      <div class="expense-tag-group" data-expense-type="travel">
+        <button class="expense-tag" onclick="addExpense('travel')" data-i18n="travel-add">Ferðakostnaður</button>
+        <button class="info-icon" onclick="openInfo('travel')" title="Útskýringar">i</button>
+      </div>
+      <div class="expense-tag-group" data-expense-type="publication">
+        <button class="expense-tag" onclick="addExpense('publication')" data-i18n="pub-add">Útgáfukostnaður</button>
+        <button class="info-icon" onclick="openInfo('publication')" title="Útskýringar og dæmi">i</button>
+      </div>
+      <div class="expense-tag-group" data-expense-type="equipment">
+        <button class="expense-tag" onclick="addExpense('equipment')" data-i18n="eq-add">Tækjakaup</button>
+        <button class="info-icon" onclick="openInfo('equipment')" title="Útskýringar">i</button>
+      </div>
+      <div class="expense-tag-group" data-expense-type="contracted">
+        <button class="expense-tag" onclick="addExpense('contracted')" data-i18n="con-add">Aðkeypt þjónusta</button>
+        <button class="info-icon" onclick="openInfo('contracted')" title="Útskýringar">i</button>
+      </div>
+    </div>
+
+    <div id="expenses-list">
+      <div class="empty-state" data-i18n="empty-expenses">Engin útgjöld bætt við ennþá.</div>
+    </div>
+  </section>
+
+  <!-- SECTION III: OVERVIEW -->
+  <section id="overview-section">
+    <div class="section-head">
+      <span class="section-num">III.</span>
+      <h2 data-i18n="overview">Heildaráætlun</h2>
+    </div>
+    <p class="section-desc" data-i18n="overview-desc">Sundurliðun fjárhagsáætlunar. Eigin fjármögnun dregst frá heildarupphæð til að sýna það sem sótt er um til Rannís.</p>
+
+    <div class="overview-wrapper">
+      <table class="overview">
+        <thead>
+          <tr>
+            <th data-i18n="th-expense">Liður</th>
+            <th data-i18n="th-total">Heild (ISK)</th>
+            <th data-i18n="th-own">Eigin fjármögnun (ISK)</th>
+            <th data-i18n="th-irf">Sótt um til Rannís (ISK)</th>
+          </tr>
+        </thead>
+        <tbody id="overview-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="yearly-breakdown" id="yearly-breakdown"></div>
+
+    <div class="grand-summary">
+      <div class="summary-block">
+        <div class="label" data-i18n="total-project">Heildarkostnaður verkefnis</div>
+        <div class="amount"><span id="grand-total">0</span><span class="currency">ISK</span></div>
+        <div class="sub" data-i18n="total-sub">Án launatengdra gjalda</div>
+      </div>
+      <div class="summary-block highlight">
+        <div class="label" data-i18n="irf-applied">Sótt um til Rannís</div>
+        <div class="amount"><span id="grand-irf">0</span><span class="currency">ISK</span></div>
+        <div class="sub" data-i18n="irf-sub">Eftir frádrátt eigin fjármögnunar</div>
+      </div>
+    </div>
+
+    <div class="cap-warning" id="capWarning" style="display:none;">
+      <div class="cap-warning-icon">!</div>
+      <div class="cap-warning-text">
+        <div class="cap-warning-title" id="capWarningTitle"></div>
+        <div class="cap-warning-detail" id="capWarningDetail"></div>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /.main-col -->
+
+  <div class="tracker-col">
+    <div class="tracker" id="tracker">
+      <div class="tracker-eyebrow" id="trackerEyebrow">Styrktegund</div>
+      <div class="tracker-grant-name" id="trackerGrantName">—</div>
+      <div class="tracker-progress">
+        <div class="tracker-progress-fill" id="trackerProgressFill" style="width: 0%;"></div>
+      </div>
+      <div class="tracker-pct" id="trackerPct">0%</div>
+      <div class="tracker-rows-wrap">
+        <div class="tracker-row">
+          <span class="tracker-row-label" id="trackerMaxLabel">Hámark</span>
+          <span class="tracker-row-value" id="trackerMax">0</span>
+        </div>
+        <div class="tracker-row">
+          <span class="tracker-row-label" id="trackerUsedLabel">Sótt um</span>
+          <span class="tracker-row-value" id="trackerUsed">0</span>
+        </div>
+        <div class="tracker-row remaining">
+          <span class="tracker-row-label" id="trackerRemainingLabel">Eftir</span>
+          <span class="tracker-row-value" id="trackerRemaining">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /.layout -->
+
+  <footer>
+    Reiknivélin notar leiðbeinandi tölur og er ætluð til undirbúnings umsókna.<br>
+    Ferðakostnaðartaxtar miðast við auglýsingu nr. 1/2025 (gildir frá 1. október 2025) frá ferðakostnaðarnefnd.<br>
+    <span style="color: var(--accent);">Athugið: launatölur í þessari útgáfu eru staðgenglar — uppfæra þarf <code style="font-family: 'IBM Plex Mono', monospace;">SALARY_TABLE</code> með raunverulegum tölum HÍ.</span>
+  </footer>
+
+</div>
+
+<!-- INFO MODAL -->
+<div class="modal-backdrop" id="infoModal" onclick="if(event.target===this) closeInfo()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-eyebrow" id="modalEyebrow">Útgjaldaflokkur</div>
+      <h3 class="modal-title" id="modalTitle"></h3>
+      <button class="modal-close" onclick="closeInfo()" aria-label="Loka">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="modalDesc"></p>
+      <div id="modalExamplesWrap" style="display:none;">
+        <div class="modal-section-title" id="modalExamplesTitle">Dæmi um færslur</div>
+        <ul class="example-list" id="modalExamples"></ul>
+      </div>
+      <div class="modal-note" id="modalNote" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION — EDIT HERE
+// ============================================================
+
+// Monthly salary by role and year (ISK). Each role has 5 values: years 1-5.
+// Source: Official HÍ rates provided by user.
+// Order: most common Rannís grant roles first (postdocs, PhD/MA students, researchers).
+const SALARY_TABLE = {
+  postdoc:      { is: 'Nýdoktor',                           en: 'Postdoctoral Researcher',              monthlyByYear: [1143000, 1183000, 1225000, 1267000, 1312000] },
+  phd:          { is: 'Doktorsnemi',                        en: 'Doctoral Student',                     monthlyByYear: [707000, 731000, 757000, 784000, 811000] },
+  ms:           { is: 'Meistaranemi',                       en: "Master's Student",                     monthlyByYear: [685000, 709000, 734000, 760000, 786000] },
+  researcher:   { is: 'Rannsakandi',                        en: 'Researcher',                           monthlyByYear: [1221000, 1264000, 1308000, 1354000, 1401000] },
+  assistant:    { is: 'Aðstoðarrannsakandi (aðstoðarmaður)',en: 'Research Assistant',                   monthlyByYear: [827000, 856000, 886000, 917000, 949000] },
+  pm:           { is: 'Verkefnaráðinn verkefnastjóri',      en: 'Project Manager (project hired)',      monthlyByYear: [1085000, 1123000, 1162000, 1203000, 1245000] },
+  lektor:       { is: 'Lektor (Rannsóknalektor)',           en: 'Lecturer / Research Lecturer',         monthlyByYear: [1558000, 1613000, 1669000, 1728000, 1788000] },
+  dosent:       { is: 'Dósent (Rannsóknadósent)',           en: 'Senior Lecturer / Research Lecturer', monthlyByYear: [1793000, 1856000, 1921000, 1988000, 2057000] },
+  prof2:        { is: 'Prófessor 2 (Rannsóknaprófessor 2)', en: 'Professor 2 / Research Professor 2', monthlyByYear: [2146000, 2221000, 2299000, 2379000, 2462000] },
+  prof1:        { is: 'Prófessor 1 (Rannsóknaprófessor 1)', en: 'Professor 1 / Research Professor 1', monthlyByYear: [2459000, 2545000, 2634000, 2726000, 2821000] },
+  adjunkt:      { is: 'Aðjúnkt 1',                          en: 'Adjunct 1',                            monthlyByYear: [1147000, 1187000, 1229000, 1272000, 1316000] },
+};
+
+// Grant types (Rannís handbók 2027, tafla 2 + kafli 3.4).
+// Each grant has a max total amount. PhD/Postdoc grants have specific rules:
+// - Locked roles: only certain personnel categories can be applied for
+// - Locked expenses: only certain expense categories are allowed
+// - Variants: different combinations of monthly salary + travel + other costs
+//   that together respect the annual cap. User picks one.
+const GRANT_LIMITS = {
+  ondvegisstyrkur: {
+    is: 'Öndvegisstyrkur',
+    en: 'Centre of Excellence',
+    max: 148410000,
+    standard: true,  // uses standard salary table + all expense categories
+  },
+  nyliðunarstyrkur: {
+    is: 'Nýliðunarstyrkur',
+    en: 'Recruitment grant',
+    max: 106080000,
+    standard: true,
+  },
+  verkefnisstyrkur: {
+    is: 'Verkefnisstyrkur',
+    en: 'Project grant',
+    max: 63752000,
+    standard: true,
+  },
+  nydoktorsstyrkur: {
+    is: 'Nýdoktorsstyrkur',
+    en: 'Postdoctoral grant',
+    max: 37524000,
+    lockedRole: 'postdoc',
+    allowedExpenses: ['travel', 'operating'],  // travel + "other costs"
+    variants: [
+      {
+        label: { is: 'Eingöngu laun', en: 'Salary only' },
+        salaryMonthly: 1042000,
+        travelTotal: 0,
+        operatingTotal: 0,
+      },
+      {
+        label: { is: 'Laun + 2.400.000 kr. í ferðakostnað (allt tímabil)', en: 'Salary + 2,400,000 ISK travel (whole period)' },
+        salaryMonthly: 975000,
+        travelTotal: 2400000,
+        operatingTotal: 0,
+      },
+      {
+        label: { is: 'Laun + 2.400.000 kr. í ferðir + 1.500.000 kr. í annan kostnað (allt tímabil)', en: 'Salary + 2,400,000 ISK travel + 1,500,000 ISK other (whole period)' },
+        salaryMonthly: 934000,
+        travelTotal: 2400000,
+        operatingTotal: 1500000,
+      },
+    ],
+    note: {
+      is: 'Sé sótt um nýdoktorsstyrk er ekki hægt að sækja um fyrir fullum launum miðað við kjarasamninga. Rannsóknasjóður gerir kröfu um að nýdoktor sinni rannsóknum í 36 mánuði til að fá fullan styrk. Upphæðir í ferða- og rekstrarkostnaði eru fyrir allt styrktímabilið (3 ár).',
+      en: 'Postdoctoral grants do not cover full collective-agreement salaries. The fund requires the postdoc to work 36 months on the project to receive the full grant. Travel and operating amounts are for the whole grant period (3 years).'
+    },
+  },
+  doktorsnemastyrkur: {
+    is: 'Doktorsnemastyrkur',
+    en: 'Doctoral student grant',
+    max: 26500000,
+    lockedRole: 'phd',
+    allowedExpenses: ['travel'],  // only travel
+    variants: [
+      {
+        label: { is: 'Eingöngu laun', en: 'Salary only' },
+        salaryMonthly: 736000,
+        travelTotal: 0,
+        operatingTotal: 0,
+      },
+      {
+        label: { is: 'Laun + 1.200.000 kr. í ferðakostnað (allt tímabil)', en: 'Salary + 1,200,000 ISK travel (whole period)' },
+        salaryMonthly: 702000,
+        travelTotal: 1200000,
+        operatingTotal: 0,
+      },
+    ],
+    note: {
+      is: 'Sjóðurinn gerir kröfu um að styrkþegi vinni 12 mánuði á ári í verkefninu og hámarksupphæð sýnir hvaða greiðslu sjóðurinn býður á mánuði. Upphæð í ferðakostnaði er fyrir allt styrktímabilið (3 ár).',
+      en: 'The fund requires the recipient to work 12 months per year on the project. Travel amount is for the whole grant period (3 years).'
+    },
+  },
+};
+
+// Travel rates per "Auglýsing nr. 1/2025 — ferðakostnaðarnefnd" (innanlands)
+const TRAVEL_RATES = {
+  innanlands: {
+    fullDayPerDiem: 17500,   // fæði heilan dag (10+ tímar)
+    halfDayPerDiem: 8650,    // fæði hálfan dag (6+ tímar) — ekki notað sjálfkrafa
+    lodgingPerNight: 38600,  // gisting í einn sólarhring
+  }
+};
+
+// Explanations and clickable example entries shown in the info modal.
+// Each example: { text, amount?, isRange? } — clicking adds an expense row with that text+amount.
+// Examples without amount are info-only and not clickable.
+// Source: Handbók Rannsóknasjóðs fyrir styrkárið 2027, kafli 3.4 "Viðurkenndur kostnaður".
+const EXPENSE_INFO = {
+  operating: {
+    title: { is: 'Rekstrarkostnaður', en: 'Operating expenses' },
+    desc: {
+      is: 'Kostnaður vegna nauðsynlegra aðfanga og reksturs verkefnisins. Gera þarf sundurliðaða grein fyrir öllum rekstrarkostnaði í umsókn — óútskýrður kostnaður er ekki samþykktur. Almennur skrifstofubúnaður (t.d. tölvur) fellur undir samrekstur og aðstöðu, ekki rekstrarkostnað.',
+      en: 'Costs for necessary supplies and operations of the project. All operating costs must be itemized in the application — unexplained costs are not accepted. General office equipment (e.g. computers) falls under shared overhead, not operating expenses.'
+    },
+    examples: [
+      { text: { is: 'Afritun einstaklingsviðtals (1 klst)', en: 'Transcription of individual interview (1 hr)' }, amount: 30000 },
+      { text: { is: 'Afritun hópviðtals (1 klst)', en: 'Transcription of group interview (1 hr)' }, amount: 50000 },
+      { text: { is: 'Könnun lögð fyrir af Menntavísindastofnun (uppsetning + sending)', en: 'Survey by Menntavísindastofnun (setup + distribution)' }, amount: 200000 },
+      { text: { is: 'Könnun + úrvinnsla frá Menntavísindastofnun', en: 'Survey + analysis by Menntavísindastofnun' }, amount: 400000 },
+    ],
+    note: {
+      is: 'Hámark: rekstrarkostnaður skal að jafnaði ekki vera hærri en <strong>20% af heildarstyrk</strong> verkefnisins. Í sérstökum tilfellum má sækja um allt að <strong>3 milljónir kr. á ári</strong> í viðbótarstyrk vegna aukins rekstrarkostnaðar með rökstuðningi. Á ekki við um doktorsnemastyrki.',
+      en: 'Cap: operating costs should generally not exceed <strong>20% of the total grant</strong>. In special cases an additional <strong>up to 3 million ISK per year</strong> may be applied for with justification. Not applicable to doctoral student grants.'
+    },
+  },
+  travel: {
+    title: { is: 'Ferðakostnaður', en: 'Travel expenses' },
+    desc: {
+      is: 'Kostnaður vegna ferða sem eru nauðsynlegar fyrir framgang verkefnisins. Færa skal rök fyrir öllum ferðum. Aðeins er styrkt ferðakostnaður beinna þátttakenda — ekki ytri samstarfsaðila (þeirra ferðakostnaður má fara undir aðkeypta þjónustu án dagpeninga).',
+      en: 'Costs for travel necessary for the project. All trips must be justified. Only travel by direct project participants is funded — not external collaborators (their travel can fall under contracted services, but without per diem).'
+    },
+    examples: [
+      { text: { is: 'Vinnufundur eða ráðstefna erlendis (2 dagar, 3 gistinætur — algeng heild)', en: 'Working meeting or conference abroad (2 days, 3 nights — typical total)' }, amount: 225000 },
+    ],
+    note: {
+      is: 'Hámark miðast við reglur Stjórnarráðsins um ferðakostnað ríkisstarfsmanna (<a href="https://www.stjornarradid.is/verkefni/mannaudsmal-rikisins/kjarasamningar-laun-og-starfskjor/ferdakostnadur/auglysingar/" target="_blank">sjá auglýsingar</a>). <strong>Vinnufundir og ráðstefnur erlendis (2 dagar, 3 gistinætur):</strong> má áætla um 225.000 kr. á ferð. <strong>Lengri ferðir erlendis:</strong> ferðakostnaður um 85.000 kr. + 55.000 kr. á sólarhring (dagpeningar = 2/3 af almennum). <strong>Innanlands:</strong> greiða eftir reikningi (dagpeningar 17.500 kr./dag, gisting 38.600 kr./nótt sem viðmið); minnt er á <a href="https://island.is/rammasamningar" target="_blank">ríkissamninga</a> um bílaleigur (AVIS, Hertz, Blue Car Rental). Af nýdoktorsstyrkjum greiðast aðeins 800.000 kr./ár, af doktorsnemastyrkjum aðeins 400.000 kr./ár.',
+      en: 'Caps follow the State\'s travel cost rules (<a href="https://www.stjornarradid.is/verkefni/mannaudsmal-rikisins/kjarasamningar-laun-og-starfskjor/ferdakostnadur/auglysingar/" target="_blank">see announcements</a>). <strong>Working meetings or conferences abroad (2 days, 3 nights):</strong> estimate ~225,000 ISK per trip. <strong>Longer trips abroad:</strong> ~85,000 ISK travel + 55,000 ISK/day (per diem = 2/3 of standard). <strong>Domestic:</strong> pay by receipt (per diem 17,500 ISK/day, lodging 38,600 ISK/night); the State has <a href="https://island.is/rammasamningar" target="_blank">framework agreements</a> for car rentals (AVIS, Hertz, Blue Car Rental). Postdoc grants: max 800,000 ISK/year travel; doctoral grants: max 400,000 ISK/year.'
+    },
+  },
+  publication: {
+    title: { is: 'Útgáfukostnaður (Birtingarkostnaður)', en: 'Publication expenses' },
+    desc: {
+      is: 'Styrkur vegna kostnaðar við ritrýndar birtingar yfir styrktímabilið. Algengast er Open Access gjöld fyrir tímaritsgreinar.',
+      en: 'Funding for peer-reviewed publication costs over the grant period. Most commonly open access fees for journal articles.'
+    },
+    examples: [
+      { text: { is: 'Open Access gjöld fyrir grein í alþjóðlegu tímariti', en: 'Open access fee for international journal article' }, amount: 500000 },
+    ],
+    note: {
+      is: 'Hámark fer eftir styrktegund: <strong>1.500.000 kr.</strong> fyrir öndvegisstyrki, <strong>750.000 kr.</strong> fyrir verkefnis-, nýliðunar- og nýdoktorsstyrki yfir allt styrktímabilið. <strong>Á ekki við um doktorsnemastyrki.</strong>',
+      en: 'Cap depends on grant type: <strong>1,500,000 ISK</strong> for Centres of Excellence; <strong>750,000 ISK</strong> for Project, Recruitment and Postdoctoral grants over the entire grant period. <strong>Not applicable to doctoral student grants.</strong>'
+    },
+  },
+  equipment: {
+    title: { is: 'Tækjakaup', en: 'Purchase of equipment' },
+    desc: {
+      is: 'Kaup á tækjum og búnaði sérstaklega fyrir verkefnið. Tilboð frá seljanda eða framleiðanda þarf að liggja fyrir við undirskrift samnings. Fyrir dýrari tæki og búnað er hægt að sækja um til Innviðasjóðs.',
+      en: 'Purchase of equipment specifically for the project. A quote from the vendor or manufacturer must be available at contract signing. For more expensive equipment, the Infrastructure Fund (Innviðasjóður) is the appropriate option.'
+    },
+    examples: [],
+    note: {
+      is: 'Hámark: <strong>3.000.000 kr.</strong> yfir styrktímabilið. <strong>Á aðeins við um öndvegis-, verkefnis- og nýliðunarstyrki</strong> — ekki nýdoktors- eða doktorsnemastyrki. Athugið: framlag vegna samreksturs og aðstöðu (25%) reiknast ekki á tækjakaup.',
+      en: 'Cap: <strong>3,000,000 ISK</strong> over the grant period. <strong>Applies only to Centres of Excellence, Project and Recruitment grants</strong> — not Postdoctoral or Doctoral Student grants. Note: the 25% overhead does not apply to equipment.'
+    },
+  },
+  contracted: {
+    title: { is: 'Aðkeypt þjónusta', en: 'Contracted services' },
+    desc: {
+      is: 'Verkhlutar sem ekki eru unnir af beinum þátttakendum, þ.m.t. einstaklingum sem skilgreindir eru sem ytri samstarfsaðilar (External collaborators). Kostnaður vegna aðgengis að rannsóknarinnviðum (innanlands eða erlendis) fellur einnig undir aðkeypta þjónustu. Tilboð skal liggja fyrir við undirskrift samnings.',
+      en: 'Work components not performed by direct participants, including those defined as external collaborators in the application. Costs for access to research infrastructure (domestic or international) also fall under contracted services. A quote must be available at contract signing.'
+    },
+    examples: [],
+    note: {
+      is: 'Hámark: <strong>allt að 20% af heildarstyrk</strong> verkefnisins (án framlags vegna samreksturs og aðstöðu). Athugið: framlag vegna samreksturs og aðstöðu (25%) reiknast ekki á aðkeypta þjónustu. <strong>Á ekki við um doktorsnemastyrki.</strong> <strong>Tækjabúnaður og innviðir HÍ:</strong> kostnaður við notkun á tækjabúnaði og innviðum í eigu Háskóla Íslands telst aðkeypt þjónusta og ber þ.a.l. ekki stjórnunar- og aðstöðugjald. Því er mikilvægt að allur kostnaður við rekstur tækjabúnaðar og aðstöðu hans sé innifalinn í notendagjöldum í gjaldskrá.',
+      en: 'Cap: <strong>up to 20% of the total grant</strong> (excluding overhead). Note: the 25% overhead does not apply to contracted services. <strong>Not applicable to doctoral student grants.</strong> <strong>HÍ equipment and infrastructure:</strong> costs for using HÍ-owned equipment and infrastructure count as contracted services and therefore do not carry the overhead charge. All operating costs of equipment and facilities should be included in the user fees in the price list.'
+    },
+  },
+};
+
+const I18N = {
+  is: {
+    salaries: 'Laun',
+    'salaries-desc': 'Bættu við starfsfólki sem fær laun greidd af verkefninu. Veldu starfshlutfall með því að stilla mánuði á ári.',
+    expenses: 'Útgjöld og þjónusta',
+    'expenses-desc': 'Veldu útgjaldaflokk til að bæta við. Hægt er að bæta við mörgum færslum í hverjum flokki — t.d. einni ferð per ári.',
+    'op-add': 'Rekstrarkostnaður',
+    'travel-add': 'Ferðakostnaður',
+    'pub-add': 'Útgáfukostnaður',
+    'eq-add': 'Tækjakaup',
+    'con-add': 'Aðkeypt þjónusta',
+    'empty-expenses': 'Engin útgjöld bætt við ennþá.',
+    overview: 'Heildaráætlun',
+    'overview-desc': 'Sundurliðun fjárhagsáætlunar. Eigin fjármögnun dregst frá heildarupphæð til að sýna það sem sótt er um til Rannís.',
+    'th-expense': 'Liður',
+    'th-total': 'Heild (ISK)',
+    'th-own': 'Eigin fjármögnun (ISK)',
+    'th-irf': 'Sótt um til Rannís (ISK)',
+    'total-project': 'Heildarkostnaður verkefnis',
+    'total-sub': 'Án launatengdra gjalda',
+    'irf-applied': 'Sótt um til Rannís',
+    'irf-sub': 'Eftir frádrátt eigin fjármögnunar',
+    'add-person': 'Bæta við starfsmanni',
+    person: 'Starfsmaður',
+    role: 'Staða',
+    count: 'Fjöldi',
+    months: 'Mánuðir á ári',
+    name: 'Nafn (valfrjálst)',
+    rowTotal: 'Samtals (öll ár)',
+    description: 'Lýsing',
+    amount: 'Upphæð (ISK)',
+    ownFinancing: 'Eigin fjármögnun (ISK)',
+    year: 'Ár',
+    travelType: 'Tegund ferðar',
+    domestic: 'Innanlands',
+    international: 'Erlendis',
+    nights: 'Gistinætur',
+    days: 'Ferðadagar',
+    travelers: 'Fjöldi ferðafólks',
+    flightCost: 'Flug per einstakling',
+    perDiem: 'Dagpeningar per dag',
+    perDiemEstimate: 'Áætl. dagpeningar/dag',
+    lodgingRate: 'Gisting per nótt',
+    operating: 'Rekstrarkostnaður',
+    travel: 'Ferðakostnaður',
+    publication: 'Útgáfukostnaður',
+    equipment: 'Tækjakaup',
+    contracted: 'Aðkeypt þjónusta',
+    salariesRow: 'Laun',
+    yearLabel: 'Ár',
+  },
+  en: {
+    salaries: 'Salaries',
+    'salaries-desc': 'Add personnel funded by the project. Set workload by adjusting months per year.',
+    expenses: 'Expenses & services',
+    'expenses-desc': 'Pick an expense category to add. You can add multiple entries per category — e.g., one trip per year.',
+    'op-add': 'Operating expenses',
+    'travel-add': 'Travel expenses',
+    'pub-add': 'Publication expenses',
+    'eq-add': 'Purchase of equipment',
+    'con-add': 'Contracted services',
+    'empty-expenses': 'No expenses added yet.',
+    overview: 'Budget overview',
+    'overview-desc': 'Budget breakdown. Own financing is subtracted from the total to show the amount applied for from IRF.',
+    'th-expense': 'Expense',
+    'th-total': 'Total (ISK)',
+    'th-own': 'Own financing (ISK)',
+    'th-irf': 'Funded by IRF (ISK)',
+    'total-project': 'Total project cost',
+    'total-sub': 'Excluding salary-related charges',
+    'irf-applied': 'Funded by IRF',
+    'irf-sub': 'After own financing deduction',
+    'add-person': 'Add personnel',
+    person: 'Personnel',
+    role: 'Role',
+    count: 'Count',
+    months: 'Months per year',
+    name: 'Name (optional)',
+    rowTotal: 'Total (all years)',
+    description: 'Description',
+    amount: 'Amount (ISK)',
+    ownFinancing: 'Own financing (ISK)',
+    year: 'Year',
+    travelType: 'Trip type',
+    domestic: 'Domestic',
+    international: 'International',
+    nights: 'No. of nights',
+    days: 'No. of travel days',
+    travelers: 'No. of travelers',
+    flightCost: 'Flight per person',
+    perDiem: 'Per diem (per day)',
+    perDiemEstimate: 'Est. per diem/day',
+    lodgingRate: 'Lodging per night',
+    operating: 'Operating expenses',
+    travel: 'Travel expenses',
+    publication: 'Publication expenses',
+    equipment: 'Purchase of equipment',
+    contracted: 'Contracted services',
+    salariesRow: 'Salaries',
+    yearLabel: 'Year',
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+
+let state = {
+  duration: 3,
+  lang: 'is',
+  grantType: 'verkefnisstyrkur',
+  variantIndex: 0,  // for nýdoktor/doktorsnema grants
+  people: [],
+  expenses: [],
+};
+
+let nextId = 1;
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function t(key) {
+  return I18N[state.lang][key] || key;
+}
+
+function fmt(n) {
+  if (!isFinite(n)) n = 0;
+  return Math.round(n).toLocaleString('is-IS');
+}
+
+function uid() { return 'id_' + (nextId++); }
+
+function setToday() {
+  const d = new Date();
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('today').textContent =
+    `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ============================================================
+// PEOPLE / SALARIES
+// ============================================================
+
+function addPerson() {
+  const person = {
+    id: uid(),
+    role: 'postdoc',
+    count: 1,
+    monthsByYear: Array(5).fill(0),
+  };
+  state.people.push(person);
+  renderPeople();
+  render();
+}
+
+function removePerson(id) {
+  state.people = state.people.filter(p => p.id !== id);
+  renderPeople();
+  render();
+}
+
+function updatePerson(id, field, value) {
+  const p = state.people.find(p => p.id === id);
+  if (!p) return;
+  if (field === 'count') {
+    p[field] = parseInt(value) || 1;
+  } else {
+    p[field] = value;
+  }
+  // For count/role changes we need to re-render the row's "Total (all years)" line
+  if (field === 'count' || field === 'role') {
+    updatePersonRowTotal(id);
+  }
+  render();
+}
+
+function updatePersonMonths(id, yearIdx, value) {
+  const p = state.people.find(p => p.id === id);
+  if (!p) return;
+  p.monthsByYear[yearIdx] = parseFloat(value) || 0;
+  updatePersonRowTotal(id);
+  render();
+}
+
+// Update just the "Total (all years)" line of one row, without re-rendering
+// the whole personnel list (which would steal focus from the input the user
+// is typing in).
+function updatePersonRowTotal(id) {
+  const p = state.people.find(p => p.id === id);
+  if (!p) return;
+  const row = document.querySelector(`.person-row[data-person-id="${id}"] .row-result-value`);
+  if (row) row.textContent = fmt(calcPersonTotal(p)) + ' ISK';
+}
+
+function calcPersonYear(person, yearIdx) {
+  const grant = getGrant();
+  let monthly;
+  // If this grant locks salaries (postdoc/phd grants), use the variant's flat monthly rate
+  if (grant.lockedRole === person.role && getCurrentVariant()) {
+    monthly = getCurrentVariant().salaryMonthly;
+  } else {
+    const yearRates = SALARY_TABLE[person.role].monthlyByYear;
+    monthly = yearRates[Math.min(yearIdx, yearRates.length - 1)];
+  }
+  const months = person.monthsByYear[yearIdx] || 0;
+  const count = person.count || 1;
+  return monthly * months * count;
+}
+
+function calcPersonTotal(person) {
+  let total = 0;
+  for (let y = 0; y < state.duration; y++) {
+    total += calcPersonYear(person, y);
+  }
+  return total;
+}
+
+function renderPeople() {
+  const container = document.getElementById('people-list');
+  const grant = getGrant();
+  const isLocked = !!grant.lockedRole;
+  const variant = getCurrentVariant();
+
+  // Build variant selector (only for locked grants)
+  let variantHtml = '';
+  if (isLocked && grant.variants) {
+    const variantOptions = grant.variants.map((v, i) => `
+      <label class="variant-option ${state.variantIndex === i ? 'selected' : ''}">
+        <input type="radio" name="variant" value="${i}" ${state.variantIndex === i ? 'checked' : ''}
+          onchange="setVariant(${i})">
+        <span class="variant-option-label">
+          ${v.label[state.lang]}
+          <span style="color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; margin-left: 8px;">
+            ${fmt(v.salaryMonthly)} kr./mán
+          </span>
+        </span>
+      </label>
+    `).join('');
+    variantHtml = `
+      <div class="variant-selector">
+        <div class="variant-selector-title">${state.lang === 'is' ? 'Veldu samsetningu' : 'Choose combination'}</div>
+        <div class="variant-options">${variantOptions}</div>
+        ${grant.note ? `<div class="variant-note">${grant.note[state.lang]}</div>` : ''}
+      </div>
+    `;
+  }
+
+  if (state.people.length === 0) {
+    container.innerHTML = variantHtml + `<div class="empty-state">${state.lang === 'is' ? 'Engir starfsmenn skráðir.' : 'No personnel added yet.'}</div>`;
+    return;
+  }
+
+  const peopleHtml = state.people.map((p, idx) => {
+    const monthInputs = [];
+    for (let y = 0; y < state.duration; y++) {
+      monthInputs.push(`
+        <div class="field">
+          <label>${t('yearLabel')} ${y+1} — ${t('months')}</label>
+          <input type="number" class="numeric" min="0" max="12" step="0.5" value="${p.monthsByYear[y]}"
+            oninput="updatePersonMonths('${p.id}', ${y}, this.value)">
+        </div>
+      `);
+    }
+
+    const total = calcPersonTotal(p);
+
+    // Role display: dropdown for standard grants, locked label for postdoc/phd grants
+    let roleField;
+    if (isLocked) {
+      const roleName = SALARY_TABLE[p.role][state.lang];
+      const lockHint = state.lang === 'is' ? '(læst af styrktegund)' : '(locked by grant type)';
+      roleField = `
+        <div class="field role-field">
+          <label>${t('role')}</label>
+          <div class="locked-role">${roleName} <span class="locked-role-hint">${lockHint}</span></div>
+        </div>
+      `;
+    } else {
+      const roleOptions = Object.entries(SALARY_TABLE).map(([key, v]) =>
+        `<option value="${key}" ${p.role === key ? 'selected' : ''}>${v[state.lang]}</option>`
+      ).join('');
+      roleField = `
+        <div class="field role-field">
+          <label>${t('role')}</label>
+          <select onchange="updatePerson('${p.id}', 'role', this.value)">${roleOptions}</select>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="person-row" data-person-id="${p.id}">
+        <div class="row-header">
+          <div class="row-label">${t('person')} ${idx+1}</div>
+          ${isLocked ? '' : `<button class="delete-btn" onclick="removePerson('${p.id}')" title="Fjarlægja">×</button>`}
+        </div>
+        <div class="person-grid" style="grid-template-columns: ${isLocked ? '1fr' : '2fr 1fr'};">
+          ${roleField}
+          ${isLocked ? '' : `
+          <div class="field">
+            <label>${t('count')}</label>
+            <input type="number" class="numeric" min="1" max="20" step="1" value="${p.count || 1}"
+              oninput="updatePerson('${p.id}', 'count', this.value)">
+          </div>`}
+        </div>
+        <div class="person-grid" style="grid-template-columns: repeat(${Math.min(state.duration, 5)}, 1fr); margin-top: 14px;">
+          ${monthInputs.join('')}
+        </div>
+        <div class="row-result">
+          <span class="row-result-label">${t('rowTotal')}</span>
+          <span class="row-result-value">${fmt(total)} ISK</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = variantHtml + peopleHtml;
+
+  // Hide "add personnel" button on locked grants — count field handles multiples
+  const addBtn = document.getElementById('addPersonBtn');
+  if (addBtn) addBtn.style.display = isLocked ? 'none' : 'block';
+}
+
+function setVariant(idx) {
+  state.variantIndex = idx;
+  renderPeople();
+  render();
+}
+
+// ============================================================
+// EXPENSES
+// ============================================================
+
+function addExpense(type) {
+  let exp;
+  if (type === 'travel') {
+    exp = {
+      id: uid(),
+      type: 'travel',
+      year: 1,
+      days: 3,
+      travelers: 1,
+      perDiemDaily: 17500,  // default: innanlands rate; user can change for international
+      flightCost: 0,
+      ownFinancing: 0,
+    };
+  } else {
+    exp = {
+      id: uid(),
+      type: type,
+      description: '',
+      year: 1,
+      amount: 0,
+      ownFinancing: 0,
+    };
+  }
+  state.expenses.push(exp);
+  renderExpenses();
+  render();
+}
+
+function removeExpense(id) {
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  renderExpenses();
+  render();
+}
+
+function updateExpense(id, field, value) {
+  const e = state.expenses.find(e => e.id === id);
+  if (!e) return;
+  if (['amount','ownFinancing','days','travelers','flightCost','perDiemDaily','year'].includes(field)) {
+    e[field] = value === '' ? 0 : parseFloat(value) || 0;
+  } else {
+    e[field] = value;
+  }
+  // Update the row's "Total" line in place (so user input keeps focus)
+  updateExpenseRowTotal(id);
+  render();
+}
+
+function updateExpenseRowTotal(id) {
+  const e = state.expenses.find(e => e.id === id);
+  if (!e) return;
+  const row = document.querySelector(`[data-expense-id="${id}"] .row-result-value`);
+  if (row) row.textContent = fmt(calcExpenseTotal(e)) + ' ISK';
+}
+
+function calcTravelTotal(e) {
+  const perDiem = e.perDiemDaily || 0;
+  const days = e.days || 0;
+  const flight = e.flightCost || 0;
+  const travelers = e.travelers || 1;
+  const perTraveler = (perDiem * days) + flight;
+  return perTraveler * travelers;
+}
+
+function calcExpenseTotal(e) {
+  if (e.type === 'travel') return calcTravelTotal(e);
+  return e.amount || 0;
+}
+
+function renderExpenses() {
+  const container = document.getElementById('expenses-list');
+  if (state.expenses.length === 0) {
+    container.innerHTML = `<div class="empty-state">${t('empty-expenses')}</div>`;
+    return;
+  }
+
+  // Group by type for visual clarity
+  const grouped = {};
+  state.expenses.forEach(e => {
+    if (!grouped[e.type]) grouped[e.type] = [];
+    grouped[e.type].push(e);
+  });
+
+  const order = ['operating','travel','publication','equipment','contracted'];
+  let html = '';
+
+  order.forEach(type => {
+    if (!grouped[type]) return;
+    grouped[type].forEach(e => {
+      html += renderExpenseRow(e);
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function renderExpenseRow(e) {
+  const yearOptions = [];
+  for (let y = 1; y <= state.duration; y++) {
+    yearOptions.push(`<option value="${y}" ${e.year === y ? 'selected' : ''}>${t('yearLabel')} ${y}</option>`);
+  }
+  const yearSelect = `<select onchange="updateExpense('${e.id}', 'year', parseInt(this.value))">${yearOptions.join('')}</select>`;
+
+  if (e.type === 'travel') {
+    const total = calcTravelTotal(e);
+    const perDiemHelp = state.lang === 'is'
+      ? 'Reiknivél stjórnarráðsins fyrir áætlaða dagpeninga'
+      : 'Government per diem calculator';
+    return `
+      <div class="travel-row" data-expense-id="${e.id}">
+        <div class="row-header">
+          <div class="row-label">${t('travel')}</div>
+          <button class="delete-btn" onclick="removeExpense('${e.id}')">×</button>
+        </div>
+        <div class="travel-grid">
+          <div class="field">
+            <label>${t('year')}</label>
+            ${yearSelect}
+          </div>
+          <div class="field">
+            <label>${t('travelers')}</label>
+            <input type="number" class="numeric" min="1" value="${e.travelers}" oninput="updateExpense('${e.id}', 'travelers', this.value)">
+          </div>
+          <div class="field">
+            <label>${t('days')}</label>
+            <input type="number" class="numeric" min="0" value="${e.days}" oninput="updateExpense('${e.id}', 'days', this.value)">
+          </div>
+          <div class="field">
+            <label>
+              ${t('perDiemEstimate')}
+              <a href="https://www.stjornarradid.is/verkefni/mannaudsmal-rikisins/ferdakostnadur/reiknivel/" target="_blank" rel="noopener" class="field-info-link" title="${perDiemHelp}">i</a>
+            </label>
+            <input type="number" class="numeric" min="0" step="500" value="${e.perDiemDaily}" oninput="updateExpense('${e.id}', 'perDiemDaily', this.value)">
+          </div>
+          <div class="field">
+            <label>${t('flightCost')}</label>
+            <input type="number" class="numeric" min="0" step="1000" value="${e.flightCost}" oninput="updateExpense('${e.id}', 'flightCost', this.value)">
+          </div>
+        </div>
+        <div class="person-grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+          <div></div>
+          <div class="field">
+            <label>${t('ownFinancing')}</label>
+            <input type="number" class="numeric" min="0" step="1000" value="${e.ownFinancing}" oninput="updateExpense('${e.id}', 'ownFinancing', this.value)">
+          </div>
+        </div>
+        <div class="row-result">
+          <span class="row-result-label">${t('rowTotal')}</span>
+          <span class="row-result-value">${fmt(total)} ISK</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // simple expense row
+  const total = calcExpenseTotal(e);
+  return `
+    <div class="expense-row" data-expense-id="${e.id}">
+      <div class="row-header">
+        <div class="row-label">${t(e.type)}</div>
+        <button class="delete-btn" onclick="removeExpense('${e.id}')">×</button>
+      </div>
+      <div class="expense-grid">
+        <div class="field">
+          <label>${t('description')}</label>
+          <input type="text" value="${e.description}" oninput="updateExpense('${e.id}', 'description', this.value)" placeholder="—">
+        </div>
+        <div class="field">
+          <label>${t('year')}</label>
+          ${yearSelect}
+        </div>
+        <div class="field">
+          <label>${t('amount')}</label>
+          <input type="number" class="numeric" min="0" step="1000" value="${e.amount}" oninput="updateExpense('${e.id}', 'amount', this.value)">
+        </div>
+      </div>
+      <div class="expense-grid" style="margin-top: 14px;">
+        <div></div>
+        <div></div>
+        <div class="field">
+          <label>${t('ownFinancing')}</label>
+          <input type="number" class="numeric" min="0" step="1000" value="${e.ownFinancing}" oninput="updateExpense('${e.id}', 'ownFinancing', this.value)">
+        </div>
+      </div>
+      <div class="row-result">
+        <span class="row-result-label">${t('rowTotal')}</span>
+        <span class="row-result-value">${fmt(total)} ISK</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// OVERVIEW / TOTALS
+// ============================================================
+
+function getTotals() {
+  // Per category, total + own financing, plus per-year breakdown
+  const cats = ['salaries','operating','travel','publication','equipment','contracted'];
+  const result = {};
+  cats.forEach(c => result[c] = { total: 0, own: 0, byYear: Array(state.duration).fill(0) });
+
+  // Salaries
+  state.people.forEach(p => {
+    for (let y = 0; y < state.duration; y++) {
+      const amt = calcPersonYear(p, y);
+      result.salaries.total += amt;
+      result.salaries.byYear[y] += amt;
+    }
+  });
+
+  // Expenses
+  state.expenses.forEach(e => {
+    const amt = calcExpenseTotal(e);
+    const yearIdx = (e.year || 1) - 1;
+    result[e.type].total += amt;
+    result[e.type].own += (e.ownFinancing || 0);
+    if (yearIdx >= 0 && yearIdx < state.duration) {
+      result[e.type].byYear[yearIdx] += amt;
+    }
+  });
+
+  return result;
+}
+
+function render() {
+  const totals = getTotals();
+  const tbody = document.getElementById('overview-body');
+  const rows = [
+    ['salaries', t('salariesRow')],
+    ['operating', t('operating')],
+    ['travel', t('travel')],
+    ['publication', t('publication')],
+    ['equipment', t('equipment')],
+    ['contracted', t('contracted')],
+  ];
+
+  let grandTotal = 0;
+  let grandOwn = 0;
+  let html = '';
+
+  rows.forEach(([key, label]) => {
+    const t_ = totals[key];
+    const irf = t_.total - t_.own;
+    grandTotal += t_.total;
+    grandOwn += t_.own;
+    html += `
+      <tr>
+        <td>${label}</td>
+        <td>${fmt(t_.total)}</td>
+        <td>${fmt(t_.own)}</td>
+        <td>${fmt(irf)}</td>
+      </tr>
+    `;
+  });
+
+  const grandIrf = grandTotal - grandOwn;
+  html += `
+    <tr class="grand-total">
+      <td>${state.lang === 'is' ? 'Samtals' : 'Total'}</td>
+      <td>${fmt(grandTotal)}</td>
+      <td>${fmt(grandOwn)}</td>
+      <td>${fmt(grandIrf)}</td>
+    </tr>
+  `;
+
+  tbody.innerHTML = html;
+
+  document.getElementById('grand-total').textContent = fmt(grandTotal);
+  document.getElementById('grand-irf').textContent = fmt(grandIrf);
+
+  // Cap warning — uses current selected grant type
+  const grant = getGrant();
+  const capWarning = document.getElementById('capWarning');
+  if (grandIrf > grant.max) {
+    const over = grandIrf - grant.max;
+    const grantName = grant[state.lang];
+    if (state.lang === 'is') {
+      document.getElementById('capWarningTitle').textContent =
+        `Yfir hámarki ${grantName.toLowerCase()}s`;
+      document.getElementById('capWarningDetail').innerHTML =
+        `Sótt um er <strong>${fmt(grandIrf)} kr.</strong> en hámark ${grantName.toLowerCase()}s er <strong>${fmt(grant.max)} kr.</strong> — það vantar að lækka um <strong>${fmt(over)} kr.</strong> eða nota eigin fjármögnun.`;
+    } else {
+      document.getElementById('capWarningTitle').textContent =
+        `Exceeds ${grantName} cap`;
+      document.getElementById('capWarningDetail').innerHTML =
+        `Applied amount is <strong>${fmt(grandIrf)} ISK</strong> but the ${grantName.toLowerCase()} cap is <strong>${fmt(grant.max)} ISK</strong> — reduce by <strong>${fmt(over)} ISK</strong> or move some to own financing.`;
+    }
+    capWarning.style.display = 'flex';
+  } else {
+    capWarning.style.display = 'none';
+  }
+
+  // Yearly breakdown
+  const yearly = document.getElementById('yearly-breakdown');
+  let yearlyHtml = '';
+  for (let y = 0; y < state.duration; y++) {
+    let yearSum = 0;
+    Object.values(totals).forEach(t_ => yearSum += t_.byYear[y]);
+    yearlyHtml += `
+      <div class="year-card">
+        <div class="year-label">${t('yearLabel')} ${y+1}</div>
+        <div class="year-amount">${fmt(yearSum)}<span class="currency">ISK</span></div>
+      </div>
+    `;
+  }
+  yearly.innerHTML = yearlyHtml;
+
+  // Update budget tracker (sticky sidebar)
+  updateTracker(grandIrf, grant);
+}
+
+function updateTracker(used, grant) {
+  const tracker = document.getElementById('tracker');
+  if (!tracker) return;
+  const max = grant.max;
+  const remaining = max - used;
+  const pct = Math.min(100, (used / max) * 100);
+
+  document.getElementById('trackerEyebrow').textContent =
+    state.lang === 'is' ? 'Styrktegund' : 'Grant type';
+  document.getElementById('trackerGrantName').textContent = grant[state.lang];
+  document.getElementById('trackerProgressFill').style.width = pct + '%';
+  document.getElementById('trackerPct').textContent =
+    Math.round((used / max) * 100) + '%';
+
+  document.getElementById('trackerMaxLabel').textContent =
+    state.lang === 'is' ? 'Hámark' : 'Cap';
+  document.getElementById('trackerMax').textContent = fmt(max);
+
+  document.getElementById('trackerUsedLabel').textContent =
+    state.lang === 'is' ? 'Sótt um' : 'Applied';
+  document.getElementById('trackerUsed').textContent = fmt(used);
+
+  document.getElementById('trackerRemainingLabel').textContent = remaining < 0
+    ? (state.lang === 'is' ? 'Yfir um' : 'Over by')
+    : (state.lang === 'is' ? 'Eftir' : 'Remaining');
+  document.getElementById('trackerRemaining').textContent = fmt(Math.abs(remaining));
+
+  if (used > max) {
+    tracker.classList.add('over');
+  } else {
+    tracker.classList.remove('over');
+  }
+}
+
+// ============================================================
+// I18N
+// ============================================================
+
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[state.lang][key]) el.textContent = I18N[state.lang][key];
+  });
+  document.documentElement.lang = state.lang;
+  renderPeople();
+  renderExpenses();
+  render();
+}
+
+// ============================================================
+// EVENT WIRING
+// ============================================================
+
+document.getElementById('duration').addEventListener('change', e => {
+  state.duration = parseInt(e.target.value);
+  // ensure expenses don't reference years past duration
+  state.expenses.forEach(ex => { if (ex.year > state.duration) ex.year = state.duration; });
+  // ensure people array sized appropriately
+  state.people.forEach(p => {
+    while (p.monthsByYear.length < 5) p.monthsByYear.push(0);
+  });
+  renderPeople();
+  renderExpenses();
+  render();
+});
+
+document.getElementById('lang').addEventListener('change', e => {
+  state.lang = e.target.value;
+  applyLang();
+});
+
+document.getElementById('grantType').addEventListener('change', e => {
+  state.grantType = e.target.value;
+  state.variantIndex = 0;
+  applyGrantConstraints();
+  renderPeople();
+  renderExpenses();
+  render();
+});
+
+// ============================================================
+// GRANT TYPE CONSTRAINTS
+// ============================================================
+
+function getGrant() {
+  return GRANT_LIMITS[state.grantType];
+}
+
+function getCurrentVariant() {
+  const grant = getGrant();
+  if (!grant.variants) return null;
+  return grant.variants[state.variantIndex] || grant.variants[0];
+}
+
+// When grant changes, enforce constraints:
+// - For locked-role grants (postdoc/phd): remove people of other roles, ensure at least one of locked role exists,
+//   remove disallowed expenses
+function applyGrantConstraints() {
+  const grant = getGrant();
+
+  if (grant.lockedRole) {
+    // Filter people to only locked role
+    state.people = state.people.filter(p => p.role === grant.lockedRole);
+    // If none, add one
+    if (state.people.length === 0) {
+      state.people.push({
+        id: uid(),
+        role: grant.lockedRole,
+        count: 1,
+        monthsByYear: Array(5).fill(0),
+      });
+    }
+    // Force role to locked role and count to 1 (only one person allowed)
+    state.people.forEach(p => {
+      p.role = grant.lockedRole;
+      p.count = 1;
+    });
+    // Trim to one person if user somehow added more
+    if (state.people.length > 1) {
+      state.people = state.people.slice(0, 1);
+    }
+  }
+
+  if (grant.allowedExpenses) {
+    state.expenses = state.expenses.filter(e => grant.allowedExpenses.includes(e.type));
+  }
+
+  // Hide/show expense category buttons in the picker
+  document.querySelectorAll('.expense-tag-group').forEach(el => {
+    const type = el.getAttribute('data-expense-type');
+    if (grant.allowedExpenses && !grant.allowedExpenses.includes(type)) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = '';
+    }
+  });
+}
+
+// ============================================================
+// INFO MODAL
+// ============================================================
+
+let currentInfoCategory = null;
+
+function openInfo(category) {
+  const info = EXPENSE_INFO[category];
+  if (!info) return;
+  currentInfoCategory = category;
+
+  document.getElementById('modalEyebrow').textContent =
+    state.lang === 'is' ? 'Útgjaldaflokkur' : 'Expense category';
+  document.getElementById('modalTitle').textContent = info.title[state.lang];
+  document.getElementById('modalDesc').textContent = info.desc[state.lang];
+
+  const examplesTitle = document.getElementById('modalExamplesTitle');
+  examplesTitle.textContent = state.lang === 'is' ? 'Dæmi um færslur' : 'Example entries';
+
+  const wrap = document.getElementById('modalExamplesWrap');
+  const list = document.getElementById('modalExamples');
+
+  if (info.examples && info.examples.length > 0) {
+    wrap.style.display = 'block';
+    list.innerHTML = info.examples.map((ex, i) => {
+      const hasAmount = typeof ex.amount === 'number';
+      const clickable = hasAmount;
+      return `
+        <li class="example-item ${clickable ? 'clickable' : ''}"
+            ${clickable ? `onclick="addExampleAsExpense('${category}', ${i})"` : ''}>
+          <span class="example-text">${ex.text[state.lang]}</span>
+          ${hasAmount ? `<span class="example-amount">${fmt(ex.amount)} ISK</span>` : ''}
+          ${clickable ? `<span class="example-add-hint">${state.lang === 'is' ? 'BÆTA VIÐ' : 'ADD'}</span>` : ''}
+        </li>
+      `;
+    }).join('');
+  } else {
+    wrap.style.display = 'none';
+  }
+
+  const note = document.getElementById('modalNote');
+  if (info.note) {
+    note.style.display = 'block';
+    note.innerHTML = info.note[state.lang];
+  } else {
+    note.style.display = 'none';
+  }
+
+  document.getElementById('infoModal').classList.add('open');
+}
+
+function closeInfo() {
+  document.getElementById('infoModal').classList.remove('open');
+  currentInfoCategory = null;
+}
+
+function addExampleAsExpense(category, exampleIdx) {
+  const ex = EXPENSE_INFO[category].examples[exampleIdx];
+  if (!ex || typeof ex.amount !== 'number') return;
+  // Add a new expense row of this category
+  addExpense(category);
+  // Find the just-added one (last in state.expenses) and set its description + amount
+  const last = state.expenses[state.expenses.length - 1];
+  last.description = ex.text[state.lang];
+  last.amount = ex.amount;
+  closeInfo();
+  renderExpenses();
+  render();
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeInfo();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+
+setToday();
+applyGrantConstraints();
+applyLang();
+</script>
+
+</body>
+</html>
